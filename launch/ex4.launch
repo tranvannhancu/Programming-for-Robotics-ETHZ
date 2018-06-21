@@ -1,0 +1,31 @@
+<launch>
+
+	<!-- Arguments, reference: control.launch file from husky_control package-->
+	<arg name="laser_enabled" default="$(optenv HUSKY_LMS1XX_ENABLED true)"/> <!-- Set to true -->
+	<arg name="kinect_enabled" default="$(optenv HUSKY_KINECT_ENABLED false)"/>
+	<arg name="urdf_extras" default="$(optenv HUSKY_URDF_EXTRAS)"/>
+	<!-- Reference: description.launch file -->
+	<param name="robot_description" command="$(find xacro)/xacro '$(find husky_description)/urdf/husky.urdf.xacro'
+		--inorder
+		laser_enabled:=$(arg laser_enabled)
+		kinect_enabled:=$(arg kinect_enabled)
+		urdf_extras:=$(arg urdf_extras)
+	" />
+
+	<!-- PARAM -->
+	<rosparam param="/use_sim_time">true</rosparam>
+
+	<!-- RVIZ -->
+	<node pkg="rviz" type="rviz" name="rviz">
+	</node>
+
+	<!-- STATE PUBLISHER -->
+	<node pkg="robot_state_publisher" type="state_publisher" name="robot_state_publisher"/>
+
+	<!-- EKF -->
+	<node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
+		<rosparam command="load"
+		    file="$(find husky_control)/config/localization.yaml"/>
+	</node>
+
+</launch>
